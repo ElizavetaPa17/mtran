@@ -1,0 +1,1 @@
+Регулярка для определения переменных (кроме структур и массивов) /DCL(\s)*(\w)*(\s)*((CHAR\(\d*\))|(FIXED DECIMAL\(\d*\))|(FLOAT DECIMAL\(\d*\))|(FIXED BIN(ARY)?\(\d*\))|(FLOAT BINARY\(\d*\))|(POINTER)|(LOGICAL)|(BIT\(\d*\))|(CHARACTER\(\d*\) VARYING)|(INTEGER))/gm

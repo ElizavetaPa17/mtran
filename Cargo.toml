@@ -1,0 +1,12 @@
+[package]
+name = "mtrans"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies] # <-- We added this and everything after!
+lalrpop = "0.22.1"
+
+[dependencies]
+lazy_static = "1.5.0"
+lalrpop-util = { version = "0.21.0", features = ["lexer", "unicode"] }
+regex = "1.11.1"

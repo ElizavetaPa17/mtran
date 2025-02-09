@@ -1,0 +1,68 @@
+
+DCL 1 Employee,
+   	2 ID FIXED BIN(31),
+   	2 Salary FIXED DECIMAL(10,2),
+   	2 Name CHAR(20);
+
+DCL Count FIXED BIN(31) INIT(0);
+DCL TotalSalary FLOAT DECIMAL(10,2) INIT(0);
+DCL Employees(10) LIKE(Employee);
+
+DO Count = 1 TO 10 BY 1;
+   Employees(Count).ID = Count;
+   Employees(Count).Salary = Count * 1000.50;
+   Employees(Count).Name = 'Employee ' || CHAR(Count);
+   TotalSalary = TotalSalary + Employees(Count).Salary;
+END;
+
+IF TotalSalary > 0 THEN
+   TotalSalary = TotalSalary / Count
+ELSE
+   TotalSalary = 0;
+
+DCL AverageSalary FLOAT DECIMAL(10,2);
+AverageSalary = TotalSalary;
+
+CALL UtilitySub();
+
+UtilitySub:
+	    PROCEDURE;
+    DCL a FLOAT BINARY;
+    a = 100;
+END UtilitySub; 
+	
+Snt:
+PROCEDURE;
+DCL i FIXED DECIMAL,
+    line CHARACTER(80) VARYING,
+    token CHARACTER(80) VARYING;
+
+line = SUBSTR(LINELENGTH(‘token’)+1);
+DO WHILE(TRUE);
+IF line = ‘’ THEN
+line = ‘empty’;
+i = VERIFY(line, ‘ ’);
+IF i = 0 THEN
+line = ‘’;
+ELSE
+DO;
+line = SUBSTR(line,i);
+i = VERIFY(line, '0123456788. ');
+IF i = 0 THEN
+token = line;
+ELSE
+IF i = 1 THEN
+token = SUBSTR(line, 1, 1);
+			ELSE
+				token = SUBSTR(line, 1, i-1);
+
+			RETURN;
+		END;
+	END;
+END Snt;
+
+DCL num1 INTEGER INIT(10);
+DCL num2 INTEGER INIT(20);
+DCL max_num INTEGER;
+
+max_num = (num1 > num2) THEN num1 ELSE num2;

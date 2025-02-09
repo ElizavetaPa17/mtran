@@ -1,0 +1,130 @@
+
+pub CHAR_T: String = {
+     "CHAR" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "char".to_string()
+};
+
+pub CHAR_VAR_T: String = {
+     "VARYING CHARACTER" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "varchar".to_string()
+};
+
+pub LOG_T: String = <s:r"LOGICAL"> => s.to_string();
+pub PTR_T: String = <s:r"POINTER"> => s.to_string();
+pub INT_T: String = <s:r"INTEGER"> => s.to_string();
+
+pub BIT_T: String = {
+     "BIT" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "bit".to_string()
+};
+
+pub FIX_BIN_T: String = {
+     r"FIXED BIN(ARY)?" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "fixed binary".to_string(),
+     r"FIXED BIN(ARY)?" <op:OPEN_PR_DEL> <d1:UDEC_INT_LIT> ", " <d2:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "fixed binary".to_string()
+};
+
+pub FLT_BIN_T: String = {
+     r"FLOAT BIN(ARY)?" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "float binary".to_string(),
+     r"FLOAT BIN(ARY)?" <op:OPEN_PR_DEL> <d1:UDEC_INT_LIT> ", " <d2:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "float binary".to_string()
+};
+
+pub FLT_DEC_T: String = {
+     r"FLOAT DECIMAL" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "float decimal".to_string(),
+     r"FLOAT DECIMAL" <op:OPEN_PR_DEL> <d1:UDEC_INT_LIT> ", " <d2:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "float decimal".to_string()
+};
+
+pub FIX_DEC_T: String = {
+     r"FIXED DECIMAL" <op:OPEN_PR_DEL> <d:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "float decimal".to_string(),
+     r"FIXED DECIMAL" <op:OPEN_PR_DEL> <d1:UDEC_INT_LIT> ", " <d2:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => "fixed decimal".to_string()
+};
+
+ARRAY_DIMEN: String = <s:r"\(\d+(, \d+)*\)"> => s.to_string();
+
+pub ARRAY_T: String = {
+    <id:IDENT> <dm:ARRAY_DIMEN> <s:r"LIKE\((\d|\w)*\)"> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:CHAR_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:LOG_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:PTR_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:BIT_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:FIX_BIN_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:FLT_BIN_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:FLT_DEC_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:FIX_DEC_T> => id.to_string(),
+    <id:IDENT> <dm:ARRAY_DIMEN> <t:INT_T> => id.to_string(),
+};
+
+STRUCT_INNER: String = {
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:CHAR_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:CHAR_VAR_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:LOG_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:PTR_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:BIT_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FIX_BIN_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FLT_BIN_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FLT_DEC_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FIX_DEC_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:INT_T> "," <c:STRUCT_INNER> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <ar:ARRAY_T> "," <c:STRUCT_INNER> => "inner struct array".to_string(),
+    <end:STRUCT_END> => end.to_string()
+};
+
+STRUCT_END: String = {
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:CHAR_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:CHAR_VAR_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:LOG_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:PTR_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:BIT_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FIX_BIN_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FLT_BIN_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FLT_DEC_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:FIX_DEC_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <t:INT_T> <del:INSTRUC_DEL> => "inner struct".to_string(),
+    r"\s*\d+ [a-zA-Z]+([a-zA-Z0-9_])*" <ar:ARRAY_T> <del:INSTRUC_DEL> => "inner struct array".to_string(),
+};
+
+STRUCT_IDENT: String = {
+    <s:r"DCL 1 [a-zA-Z]+([a-zA-Z0-9_])*"> => s.to_string()
+};
+
+pub STRUCT_T: String = {
+    <id:STRUCT_IDENT> "," <inner:STRUCT_INNER> => "struct".to_string()
+};
+
+pub PLUS_OP: String = <s:r"\+"> => s.to_string();
+pub MIN_OP: String = <s:r"-"> => s.to_string();
+pub MUL_OP: String = <s:r"\*"> => s.to_string();
+pub DIV_OP: String = <s:r"/"> => s.to_string();
+pub AND_BIT_OP: String = <s:r"(AND)|(&)"> => s.to_string();
+pub OR_BIT_OP: String = <s:r"(OR)|(\|)"> => s.to_string();
+pub XOR_BIT_OP: String = <s:r"(XOR)|(\^)"> => s.to_string();
+pub AND_CND_OP: String = <s:r"&&"> => s.to_string();
+pub OR_CND_OP: String = <s:r"\|\|"> => s.to_string();
+
+pub EQ_CMP: String = <s:r"=="> => s.to_string();
+pub NQ_CMP: String = <s:r"!="> => s.to_string();
+pub LS_CMP: String = <s:r"<"> => s.to_string();
+pub GR_CMP: String = <s:r">"> => s.to_string();
+pub LE_CMP: String = <s:r"<="> => s.to_string();
+pub GE_CMP: String = <s:r">="> => s.to_string();
+
+pub INIT_KW: String = { 
+   <s:"INIT"> "(" <d1:UDEC_INT_LIT> ", " <d2:UDEC_INT_LIT> ")" => s.to_string(),
+   <s:"INIT"> "(" <d1:UDEC_INT_LIT> ")" => s.to_string(),
+   <s:"INIT"> "(" <d1:DEC_INT_LIT> ")" => s.to_string(),
+   <s:"INIT"> "(" <b1:BIN_INT_LIT> ")" => s.to_string(),
+   <s:"INIT"> "(" <b1:CHR_LIT> ")" => s.to_string(),
+}
+
+pub IDENT: String = <s:r"\s*DCL\s+[a-zA-Z]+([a-zA-Z0-9_])*\s*"> => s.to_string();
+
+pub DECLARATION: String = { 
+     <id:IDENT> <t:CHAR_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:CHAR_VAR_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:LOG_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:PTR_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:INT_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:BIT_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:FIX_BIN_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:FLT_BIN_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:FLT_DEC_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <id:IDENT> <t:FIX_DEC_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <t:ARRAY_T>  <end_del:INSTRUC_DEL> => "char dec".to_string(),
+     <t:STRUCT_T> <end_del:INSTRUC_DEL> => "char dec".to_string(),
+};
