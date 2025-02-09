@@ -46,8 +46,8 @@ UserInput = 'Введите строку для добавления (или "EX
   	END;
 END;
 
-DCL  BitString1 BIT(8) INIT('00000001'B); 
-DCL  BitString2 BIT(8) INIT('00000010'B); 
+DCL  BitString1 BIT(8) INIT(00000001B); 
+DCL  BitString2 BIT(8) INIT(00000010B); 
 DCL  Result BIT(8);
 
 Result = BitString1 & BitString2; 

@@ -116,42 +116,6 @@ pub ARRAY_T: Vec<MyToken> = {
           output
      },
 
-     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"LOGICAL"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
-          let mut output = vec![id, del1];
-          output.extend(dim);
-          output.push(del2);
-          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
-          output.push(del3);
-          output.push(MyToken::Type{ val: t.to_string() });
-          output.push(del4);
-          output.push(end_del);
-          output
-     },
-
-     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"POINTER"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
-          let mut output = vec![id, del1];
-          output.extend(dim);
-          output.push(del2);
-          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
-          output.push(del3);
-          output.push(MyToken::Type{ val: t.to_string() });
-          output.push(del4);
-          output.push(end_del);
-          output
-     },
-
-     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"INTEGER"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
-          let mut output = vec![id, del1];
-          output.extend(dim);
-          output.push(del2);
-          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
-          output.push(del3);
-          output.push(MyToken::Type{ val: t.to_string() });
-          output.push(del4);
-          output.push(end_del);
-          output
-     },
-
      <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:IDENT> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
           let mut output = vec![id, del1];
           output.extend(dim);
@@ -173,6 +137,9 @@ TYPE_T: Vec<MyToken> = {
      <t:FLT_BIN_T>  => t,
      <t:FIX_DEC_T>  => t,
      <t:FLT_DEC_T>  => t,
+     "LOGICAL" => vec![MyToken::Type{ val: "LOGICAL".to_string() }],
+     "POINTER" => vec![MyToken::Type{ val: "POINTER".to_string() }],
+     "INTEGER" => vec![MyToken::Type{ val: "INTEGER".to_string() }]
 };
 
 
@@ -181,21 +148,6 @@ STRUCT_INNER: Vec<MyToken> = {
        let mut output = vec![level, id];
        output.extend(t);
        output.push(del);
-       output.extend(c);
-       output
-    },
-    <level:UDEC_INT_LIT> <id:IDENT> "LOGICAL" <del:COMMA_DEL> <c:STRUCT_INNER> => {
-       let mut output = vec![level, id, MyToken::Type { val: "logical".to_string() }, del];
-       output.extend(c);
-       output
-    },
-    <level:UDEC_INT_LIT> <id:IDENT> "POINTER" <del:COMMA_DEL> <c:STRUCT_INNER> => {
-       let mut output = vec![level, id, MyToken::Type { val: "ptr".to_string() }, del];
-       output.extend(c);
-       output
-    },
-    <level:UDEC_INT_LIT> <id:IDENT> "INTEGER" <del:COMMA_DEL> <c:STRUCT_INNER> => {
-       let mut output = vec![level, id, MyToken::Type { val: "int".to_string() }, del];
        output.extend(c);
        output
     },
@@ -214,20 +166,6 @@ STRUCT_END: Vec<MyToken> = {
        output.push(end_del);
        output
     },
-    
-    <level:UDEC_INT_LIT> <id:IDENT> "LOGICAL" <end_del:INSTRUC_DEL> => {
-       let mut output = vec![level, id, MyToken::Type { val: "logical".to_string() }, end_del];
-       output
-    },
-    <level:UDEC_INT_LIT> <id:IDENT> "POINTER" <end_del:INSTRUC_DEL> => {
-       let mut output = vec![level, id, MyToken::Type { val: "ptr".to_string() }, end_del];
-       output
-    },
-    <level:UDEC_INT_LIT> <id:IDENT> "INTEGER" <end_del:INSTRUC_DEL> => {
-       let mut output = vec![level, id, MyToken::Type { val: "int".to_string() }, end_del];
-       output
-    },
-
     <level:UDEC_INT_LIT> <id:IDENT> <end_del:INSTRUC_DEL> => {
        let mut output = vec![level, id, end_del];
        output
@@ -235,7 +173,7 @@ STRUCT_END: Vec<MyToken> = {
 };
 
 pub STRUCT_T: Vec<MyToken> = {
-    <s:r"DCL\s+"> <c:STRUCT_INNER> => {
+     <c:STRUCT_INNER> => {
        let mut output = c;
        output
     }
@@ -275,25 +213,27 @@ pub IDENT: MyToken = {
 };
 
 pub DECLARATION: Vec<MyToken> = { 
-     <s:r"DCL\s+"> <id:IDENT> <t:TYPE_T> <end_del:INSTRUC_DEL> =>  { 
-          let mut output = vec![id];
+     r"DCL\s+" <id:IDENT> <t:TYPE_T> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }, id];
           output.extend(t);
           output.push(end_del);
           output
      },
-     <s:r"DCL\s+"> <id:IDENT> <t:TYPE_T> <i:INIT_CONSTR> <end_del:INSTRUC_DEL> =>  { 
-          let mut output = vec![id];
+     r"DCL\s+" <id:IDENT> <t:TYPE_T> <i:INIT_CONSTR> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }, id];
           output.extend(t);
           output.extend(i);
           output.push(end_del);
           output
      },
 
-     <s:STRUCT_T> =>  { 
-          s
+     r"DCL\s+" <st:STRUCT_T> =>  { 
+          let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }];
+          output.extend(st);
+          output
      },
 
-     "DCL " <a:ARRAY_T> => {
+     r"DCL\s+" <a:ARRAY_T> => {
           let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }];
           output.extend(a);
           output
