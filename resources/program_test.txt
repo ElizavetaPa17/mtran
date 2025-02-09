@@ -1,1 +1,2 @@
-DCL 1 person CHAR(50), 2 Name CHAR(50);
+DCL PersonsArray(10) LIKE(Person);
+DCL PersonsArray2(10, 10) LIKE(CHAR(30));

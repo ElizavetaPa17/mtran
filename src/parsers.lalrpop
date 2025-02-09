@@ -91,6 +91,80 @@ pub FIX_DEC_T: Vec<MyToken> = {
      },
 };
 
+pub ARRAY_DIMEN: Vec<MyToken> = {
+     <d:UDEC_INT_LIT> <del:COMMA_DEL> <a:ARRAY_DIMEN> => {
+          let mut output = vec![d, del];
+          output.extend(a);
+          output
+     },
+
+     <d:UDEC_INT_LIT> => {
+          vec![d]
+     }
+}
+
+pub ARRAY_T: Vec<MyToken> = {
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:TYPE_T> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![id, del1];
+          output.extend(dim);
+          output.push(del2);
+          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
+          output.push(del3);
+          output.extend(t);
+          output.push(del4);
+          output.push(end_del);
+          output
+     },
+
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"LOGICAL"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![id, del1];
+          output.extend(dim);
+          output.push(del2);
+          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
+          output.push(del3);
+          output.push(MyToken::Type{ val: t.to_string() });
+          output.push(del4);
+          output.push(end_del);
+          output
+     },
+
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"POINTER"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![id, del1];
+          output.extend(dim);
+          output.push(del2);
+          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
+          output.push(del3);
+          output.push(MyToken::Type{ val: t.to_string() });
+          output.push(del4);
+          output.push(end_del);
+          output
+     },
+
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:"INTEGER"> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![id, del1];
+          output.extend(dim);
+          output.push(del2);
+          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
+          output.push(del3);
+          output.push(MyToken::Type{ val: t.to_string() });
+          output.push(del4);
+          output.push(end_del);
+          output
+     },
+
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:IDENT> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
+          let mut output = vec![id, del1];
+          output.extend(dim);
+          output.push(del2);
+          output.push(MyToken::Keywoard{ val: "LIKE".to_string() });
+          output.push(del3);
+          output.push(t);
+          output.push(del4);
+          output.push(end_del);
+          output
+     },
+}
+
 TYPE_T: Vec<MyToken> = {
      <t:CHAR_T>     => t,
      <t:CHAR_VAR_T> => t,
@@ -218,4 +292,10 @@ pub DECLARATION: Vec<MyToken> = {
      <s:STRUCT_T> =>  { 
           s
      },
+
+     "DCL " <a:ARRAY_T> => {
+          let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }];
+          output.extend(a);
+          output
+     }
 };

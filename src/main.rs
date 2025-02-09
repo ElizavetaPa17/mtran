@@ -24,22 +24,22 @@ fn lex_analyze(exprs: &Vec<String>) {
                 println!("decl: {:?}", some);
                 continue;
             },
-            _ => (),
+            Err(some) => println!("err: {:?}", some),
         };
 
-        match struct_p.parse(expr) {
+        /*match struct_p.parse(expr) {
             Ok(some) => { 
                 println!("decl: {:?}", some);
                 continue;
             },
             Err(some) => println!("err: {:?}", some),
-        };
+        };*/
     }
 }
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program1.txt";
+    let file_path = "./resources/program_test.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 

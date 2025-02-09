@@ -46,6 +46,7 @@ ELSE
 	
 CalculateSum:
    PROCEDURE (x, y) RETURNS(FLOAT DECIMAL(10,2));
-   DCL (x, y) FLOAT DECIMAL(10, 2);
+   DCL x FLOAT DECIMAL(10, 2);
+   DCL y FLOAT DECIMAL(10, 2);
    RETURN (x + y);
 END CalculateSum;
