@@ -13,33 +13,24 @@ fn split_by_exprs(input: String) -> Vec<String> {
 fn lex_analyze(exprs: &Vec<String>) {
     #[allow(unused_variables)]
     // Init parsers
-    let declar_p   = parsers::DECLARATIONParser::new();
-    let struct_p   = parsers::STRUCT_TParser::new();
+    let inst_p   = parsers::INSTRUCTIONParser::new();
 
     for expr in exprs {
         println!("{}", expr);
 
-        match declar_p.parse(expr) {
+        match inst_p.parse(expr) {
             Ok(some) => { 
                 println!("decl: {:?}", some);
                 continue;
             },
             Err(some) => println!("err: {:?}", some),
         };
-
-        /*match struct_p.parse(expr) {
-            Ok(some) => { 
-                println!("decl: {:?}", some);
-                continue;
-            },
-            Err(some) => println!("err: {:?}", some),
-        };*/
     }
 }
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program3.txt";
+    let file_path = "./resources/program1.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 

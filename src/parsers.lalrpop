@@ -12,6 +12,17 @@ pub COMMA_DEL:   MyToken = <s:r"\s*,\s*"> => MyToken::Delimiter{ val: s.to_strin
 pub ASSIGN_DEL:  MyToken = <s:"="> => MyToken::Delimiter{ val: s.to_string() };
 pub FIELD_DEL:   MyToken = <s:"."> => MyToken::Delimiter{ val: s.to_string() };
 
+pub DEL_DEL: MyToken = {
+     <del:OPEN_PR_DEL> => del,
+     <del:CLOS_PR_DEL> => del,
+     <del:OPEN_BR_DEL> => del,
+     <del:CLOS_BR_DEL> => del,
+     <del:INSTRUC_DEL> => del,
+     <del:COMMA_DEL>   => del,
+     <del:ASSIGN_DEL>  => del,
+     <del:FIELD_DEL>   => del,
+};
+
 
 pub FLT_LIT: MyToken = <s:r"-?\d+\.\d+"> => MyToken::Literal{ t: "float".to_string(), val: s.to_string() };
 pub FLT_EXP_LIT: MyToken = { 
@@ -179,23 +190,22 @@ pub STRUCT_T: Vec<MyToken> = {
     }
 };
 
-pub PLUS_OP:    MyToken = <s:r"\+"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub MIN_OP:     MyToken = <s:r"-">  =>   MyToken::BinOperator{ val: s.to_string() };
-pub MUL_OP:     MyToken = <s:r"\*"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub DIV_OP:     MyToken = <s:r"/">  =>   MyToken::BinOperator{ val: s.to_string() };
-pub AND_BIT_OP: MyToken = <s:r"&">  =>   MyToken::BinOperator{ val: s.to_string() };
-pub OR_BIT_OP:  MyToken = <s:r"\|"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub XOR_BIT_OP: MyToken = <s:r"\^"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub AND_CND_OP: MyToken = <s:r"&&"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub OR_CND_OP:  MyToken = <s:r"\|\|"> => MyToken::BinOperator{ val: s.to_string() };
+pub PLUS_OP:    MyToken = <s:"+"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub MIN_OP:     MyToken = <s:"-">  =>   MyToken::BinOperator{ val: s.to_string() };
+pub MUL_OP:     MyToken = <s:"*"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub DIV_OP:     MyToken = <s:"">  =>   MyToken::BinOperator{ val: s.to_string() };
+pub AND_BIT_OP: MyToken = <s:"&">  =>   MyToken::BinOperator{ val: s.to_string() };
+pub OR_BIT_OP:  MyToken = <s:"|"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub XOR_BIT_OP: MyToken = <s:"^"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub AND_CND_OP: MyToken = <s:"&&"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub OR_CND_OP:  MyToken = <s:"||"> => MyToken::BinOperator{ val: s.to_string() };
 
-pub EQ_CMP: MyToken = <s:r"=="> => MyToken::CmpOperator{ val: s.to_string() };
-pub NQ_CMP: MyToken = <s:r"!="> => MyToken::CmpOperator{ val: s.to_string() };
-pub LS_CMP: MyToken = <s:r"<"> =>  MyToken::CmpOperator{ val: s.to_string() };
-pub GR_CMP: MyToken = <s:r">"> =>  MyToken::CmpOperator{ val: s.to_string() };
-pub LE_CMP: MyToken = <s:r"<="> => MyToken::CmpOperator{ val: s.to_string() };
-pub GE_CMP: MyToken = <s:r">="> => MyToken::CmpOperator{ val: s.to_string() };
-
+pub EQ_CMP: MyToken = <s:"=="> => MyToken::CmpOperator{ val: s.to_string() };
+pub NQ_CMP: MyToken = <s:"!="> => MyToken::CmpOperator{ val: s.to_string() };
+pub LS_CMP: MyToken = <s:"<"> =>  MyToken::CmpOperator{ val: s.to_string() };
+pub GR_CMP: MyToken = <s:">"> =>  MyToken::CmpOperator{ val: s.to_string() };
+pub LE_CMP: MyToken = <s:"<="> => MyToken::CmpOperator{ val: s.to_string() };
+pub GE_CMP: MyToken = <s:">="> => MyToken::CmpOperator{ val: s.to_string() };
 
 pub INIT_CONSTR: Vec<MyToken> = { 
    <s:"INIT"> <op:OPEN_PR_DEL> <d1:LIT_LIT> <del:COMMA_DEL> <d2:LIT_LIT> <cp:CLOS_PR_DEL> => {
@@ -238,4 +248,44 @@ pub DECLARATION: Vec<MyToken> = {
           output.extend(a);
           output
      }
+};
+
+pub EXPR: Vec<MyToken> = {
+     #[precedence(level="0")]
+     <del1:DEL_DEL> <exp:EXPR> <del2:DEL_DEL> => {
+          let mut output = vec![del1]; output.extend(exp); output.push(del2); output
+     },
+
+     #[precedence(level="1")] #[assoc(side="left")]
+     <exp1:EXPR> <op:MUL_OP> <exp2:EXPR> => {
+          let mut output = exp1; output.push(op); output.extend(exp2); output
+     },
+
+     #[precedence(level="2")] #[assoc(side="left")]
+     <exp1:EXPR> <op:PLUS_OP> <exp2:EXPR> => {
+          let mut output = exp1; output.push(op); output.extend(exp2); output
+     },
+     <expr:IDENT> => {
+          vec![expr]
+     },
+     <expr:LIT_LIT> => {
+          vec![expr]
+     }
+};
+
+pub CYCLE: Vec<MyToken> = {
+     r"DO\s+" <id:IDENT> <del:ASSIGN_DEL> <lit1:LIT_LIT> r"\s+TO\s+" <lit2:LIT_LIT> <end_del:INSTRUC_DEL> => {
+          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, id, del, lit1, MyToken::Keywoard{ val: "TO".to_string()}, lit2, end_del];
+          output
+     },
+
+     r"DO\s+" <id:IDENT> <del:ASSIGN_DEL> <lit1:LIT_LIT> r"\s+TO\s+" <lit2:LIT_LIT> "BY" <lit3:LIT_LIT> <end_del:INSTRUC_DEL> => {
+          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, id, del, lit1, MyToken::Keywoard{ val: "TO".to_string()}, lit2, MyToken::Keywoard{ val: "BY".to_string()}, lit3, end_del];
+          output
+     }
+};
+
+pub INSTRUCTION: Vec<MyToken> = {
+     <decl:DECLARATION> => decl,
+     <cycl:CYCLE> => cycl
 };
