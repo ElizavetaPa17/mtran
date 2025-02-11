@@ -27,7 +27,7 @@ fn lex_analyze(exprs: &Vec<String>) {
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program3.txt";
+    let file_path = "./resources/program2.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 

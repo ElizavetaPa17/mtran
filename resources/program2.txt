@@ -33,7 +33,7 @@ DCL Continue LOGICAL INIT('Y');
 
 DO FOREVER;
    IF Continue THEN UserInput = 'Введите строку для добавления (или EXIT для выхода)';
-  	IF CALL TRIM(UserInput) = 'EXIT' THEN
+  	IF CALL TRIM(UserInput) THEN
      		LEAVE;
   	END;
 
