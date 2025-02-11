@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use crate::token::MyToken; 
 
 grammar;
@@ -172,14 +171,14 @@ STRUCT_END: Vec<MyToken> = {
        output
     },
     <level:UDEC_INT_LIT> <id:IDENT> <end_del:INSTRUC_DEL> => {
-       let mut output = vec![level, id, end_del];
+       let output = vec![level, id, end_del];
        output
     },
 };
 
 pub STRUCT_T: Vec<MyToken> = {
      <c:STRUCT_INNER> => {
-       let mut output = c;
+       let output = c;
        output
     }
 };
@@ -348,10 +347,6 @@ pub DECLARATION: Vec<MyToken> = {
      }
 };
 
-pub FUNCTION_CALL: Vec<MyToken> = {
-     
-};
-
 pub EXPR: Vec<MyToken> = {
      #[precedence(level="0")]
      <expr:IDENT> => {
@@ -485,7 +480,7 @@ pub CYCLE: Vec<MyToken> = {
      },
 
      r"DO\s+FOREVER\s*" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO FOREVER".to_string() }];
+          let output = vec![MyToken::Keywoard{ val: "DO FOREVER".to_string() }];
           output
      },
 };
@@ -524,11 +519,11 @@ pub CONDITION: Vec<MyToken> = {
 
 pub END_INSTR: Vec<MyToken> = {
      "END" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "END".to_string() }, end_del];
+          let output = vec![MyToken::Keywoard{ val: "END".to_string() }, end_del];
           output
      },
      "END" <id:IDENT> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "END".to_string() }, id, end_del];
+          let output = vec![MyToken::Keywoard{ val: "END".to_string() }, id, end_del];
           output
      }
 }
@@ -543,10 +538,10 @@ pub INSTRUCTION: Vec<MyToken> = {
           let mut output = vec![MyToken::Keywoard{ val: "RETURN".to_string() }]; output.extend(exp); output
      },
      "RETURN" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "RETURN".to_string() }, end_del]; output
+          let output = vec![MyToken::Keywoard{ val: "RETURN".to_string() }, end_del]; output
      },
 
      <end_del:INSTRUC_DEL> => {
-          let mut output = vec![end_del]; output
+          let output = vec![end_del]; output
      },
 };

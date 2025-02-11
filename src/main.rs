@@ -16,16 +16,11 @@ fn lex_analyze(exprs: &Vec<String>) {
     let inst_p   = parsers::INSTRUCTIONParser::new();
 
     for expr in exprs {
-        println!("{}", expr);
-
         match inst_p.parse(expr) {
-            Err(some) => println!("err: {:?}", some),
-            // Ok(some) => { 
-            //     println!("decl: {:?}", some);
-            //     continue;
-            // },
-            _ => {}
-            // Err(some) => println!("err: {:?}", some),
+            Ok(some) => { 
+                 continue;
+            },
+            Err(some) => println!("ERROR: {:?}", some),
         };
     }
 }
@@ -36,7 +31,7 @@ fn main() {
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 
-    file.read_to_string(&mut contents);
+    let _ = file.read_to_string(&mut contents);
     let exprs: Vec<String> = split_by_exprs(contents);
     lex_analyze(&exprs);
 }
