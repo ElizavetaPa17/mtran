@@ -7,42 +7,41 @@ DCL ProductsArray(5) LIKE(Product);
 DCL j FIXED BINARY(15);
 DCL totalPrice FLOAT DECIMAL(10,2) INIT(0.0);
 DCL P POINTER; 
-P = addr(totalPrice);
+P = CALL ADDR(totalPrice);
 
 DO j = 1 TO 5 BY 1;
-	ProductsArray(j).ID = j;
-	ProductsArray(j).Name = 'Product ' || CHAR(j);
-	ProductsArray(j).Price = j * 10.50;
-	totalPrice = totalPrice + ProductsArray(j).Price;
+	ProductsArray[j].ID = j;
+	ProductsArray[j].Name = 'Product ' || j;
+	ProductsArray[j].Price = j * 10.50;
+	totalPrice = totalPrice + ProductsArray[j].Price;
 END;
 
-SELECT totalPrice
-	WHEN :totalPrice < 50 THEN
-    	/* обработка случая, когда общая цена меньше 50 */
-	WHEN :totalPrice >= 50 AND :totalPrice < 100 THEN
-    	/* обработка случая, когда общая цена между 50 и 100 */
+SELECT;
+	WHEN totalPrice < 50;
+    	totalPrice = 51;
+	WHEN totalPrice >= 50 && totalPrice < 100;
+    	totalPrice = 101;
 	OTHERWISE
-    	/* обработка по умолчанию */;
+    	totalPrice = 0;
 
-DCL 1 StringList,
-   	2 Strings(5) VARYING CHARACTER(100);
+DCL 1 StringList VARYING CHARACTER(100),
+	2 Strings(5) LIKE(VARYING CHARACTER(100));
 
 DCL Index FIXED BINARY(31) INIT(1);
 DCL UserInput CHAR(100);
 DCL Continue LOGICAL INIT('Y');
 
 DO FOREVER;
-   IF Continue THEN
-UserInput = 'Введите строку для добавления (или "EXIT" для выхода):';
-  	IF TRIM(UserInput) = 'EXIT' THEN
+   IF Continue THEN UserInput = 'Введите строку для добавления (или EXIT для выхода)';
+  	IF CALL TRIM(UserInput) = 'EXIT' THEN
      		LEAVE;
   	END;
 
-  	Strings(Index) = TRIM(UserInput);
+  	Strings[Index] = CALL TRIM(UserInput);
   	Index = Index + 1;
 
   	IF Index > 5 THEN
-     		Continue = 'N'; // Прекращаем ввод, если массив заполнился
+     		Continue = 'N'; 
   	END;
 END;
 

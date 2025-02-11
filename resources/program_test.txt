@@ -1,2 +1,4 @@
-DCL PersonsArray(10) LIKE(Person);
-DCL PersonsArray2(10, 10) LIKE(CHAR(30));
+totalAge = totalAge + PersonsArray[i].Age;
+totalAge + PersonsArray[i].Age;
+PersonsArray[i].Age;
+totalAge = CALL CalculateSum(10, 2);

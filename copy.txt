@@ -11,9 +11,7 @@ pub FLT_EXP_LIT: MyToken = {
 pub UDEC_INT_LIT: MyToken = <s:r"\d+">           => MyToken::Literal{ t: "udec".to_string(), val: s.to_string() };
 pub DEC_INT_LIT:  MyToken = <s:r"-\d+">          => MyToken::Literal{ t: "dec".to_string(),  val: s.to_string() };
 pub BIN_INT_LIT:  MyToken = <s:r"[0-1]+B">       => MyToken::Literal{ t: "bin".to_string(),  val: s.to_string() };
-pub CHR_LIT:      MyToken = <s:r"'([\s\wа-яА-Я\d\.\)\(])+'"> => MyToken::Literal{ t: "char".to_string(), val: s.to_string() };
-pub TRUE_BOOL_LIT:      MyToken = <s:"TRUE">  => MyToken::Literal{ t: "bool".to_string(),  val: s.to_string() };
-pub FALSE_BOOL_LIT:     MyToken = <s:"FALSE">  => MyToken::Literal{ t: "bool".to_string(),  val: s.to_string() };
+pub CHR_LIT:      MyToken = <s:r"'(\s|\w|\d)+'"> => MyToken::Literal{ t: "char".to_string(), val: s.to_string() };
 
 pub DEC_LIT: MyToken = {
      <l:FLT_LIT> => l,
@@ -24,10 +22,8 @@ pub DEC_LIT: MyToken = {
 };
 
 pub LIT_LIT: MyToken = {
-     <l:DEC_LIT>  => l,
-     <l:CHR_LIT>  => l,
-     <l:TRUE_BOOL_LIT>   => l,
-     <l:FALSE_BOOL_LIT>  => l
+     <l:DEC_LIT> => l,
+     <l:CHR_LIT> => l,
 };
 
 pub CHAR_T: Vec<MyToken> = {
@@ -98,7 +94,7 @@ pub ARRAY_DIMEN: Vec<MyToken> = {
 }
 
 pub ARRAY_T: Vec<MyToken> = {
-     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:TYPE_T> <del4:CLOS_PR_DEL> =>  { 
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:TYPE_T> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
           let mut output = vec![id, del1];
           output.extend(dim);
           output.push(del2);
@@ -106,10 +102,11 @@ pub ARRAY_T: Vec<MyToken> = {
           output.push(del3);
           output.extend(t);
           output.push(del4);
+          output.push(end_del);
           output
      },
 
-     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:IDENT> <del4:CLOS_PR_DEL> =>  { 
+     <id:IDENT> <del1:OPEN_PR_DEL> <dim:ARRAY_DIMEN> <del2:CLOS_PR_DEL> "LIKE" <del3:OPEN_PR_DEL> <t:IDENT> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> =>  { 
           let mut output = vec![id, del1];
           output.extend(dim);
           output.push(del2);
@@ -117,6 +114,7 @@ pub ARRAY_T: Vec<MyToken> = {
           output.push(del3);
           output.push(t);
           output.push(del4);
+          output.push(end_del);
           output
      },
 }
@@ -143,13 +141,6 @@ STRUCT_INNER: Vec<MyToken> = {
        output.extend(c);
        output
     },
-    <level:UDEC_INT_LIT> <arr:ARRAY_T> <del:COMMA_DEL> <c:STRUCT_INNER> => {
-       let mut output = vec![level];
-       output.extend(arr);
-       output.push(del);
-       output.extend(c);
-       output
-    },
     <level:UDEC_INT_LIT> <id:IDENT> <del:COMMA_DEL> <c:STRUCT_INNER> => {
        let mut output = vec![level, id, del];
        output.extend(c);
@@ -162,12 +153,6 @@ STRUCT_END: Vec<MyToken> = {
     <level:UDEC_INT_LIT> <id:IDENT> <t:TYPE_T> <end_del:INSTRUC_DEL> => {
        let mut output = vec![level, id];
        output.extend(t);
-       output.push(end_del);
-       output
-    },
-    <level:UDEC_INT_LIT> <arr:ARRAY_T> <end_del:INSTRUC_DEL> => {
-       let mut output = vec![level];
-       output.extend(arr);
        output.push(end_del);
        output
     },
@@ -188,8 +173,8 @@ pub OPEN_PR_DEL: MyToken = <s:"("> => MyToken::Delimiter{ val: s.to_string() };
 pub CLOS_PR_DEL: MyToken = <s:")"> => MyToken::Delimiter{ val: s.to_string() };
 pub OPEN_BR_DEL: MyToken = <s:"["> => MyToken::Delimiter{ val: s.to_string() };
 pub CLOS_BR_DEL: MyToken = <s:"]"> => MyToken::Delimiter{ val: s.to_string() };
-pub INSTRUC_DEL: MyToken = <s:";"> => MyToken::Delimiter{ val: s.to_string() };
-pub COMMA_DEL:   MyToken = <s:","> => MyToken::Delimiter{ val: s.to_string() };
+pub INSTRUC_DEL: MyToken = <s:r"\s*;\s*"> => MyToken::Delimiter{ val: s.to_string() };
+pub COMMA_DEL:   MyToken = <s:r"\s*,\s*"> => MyToken::Delimiter{ val: s.to_string() };
 pub ASSIGN_DEL:  MyToken = <s:"="> => MyToken::Delimiter{ val: s.to_string() };
 pub FIELD_DEL:   MyToken = <s:"."> => MyToken::Delimiter{ val: s.to_string() };
 
@@ -207,8 +192,7 @@ pub DEL_DEL: MyToken = {
 pub PLUS_OP:    MyToken = <s:"+"> =>   MyToken::BinOperator{ val: s.to_string() };
 pub MIN_OP:     MyToken = <s:"-">  =>  MyToken::BinOperator{ val: s.to_string() };
 pub MUL_OP:     MyToken = <s:"*"> =>   MyToken::BinOperator{ val: s.to_string() };
-pub DIV_OP:     MyToken = <s:"/">  =>   MyToken::BinOperator{ val: s.to_string() };
-pub MOD_OP:     MyToken = <s:"%"> =>   MyToken::BinOperator{ val: s.to_string() };
+pub DIV_OP:     MyToken = <s:"">  =>   MyToken::BinOperator{ val: s.to_string() };
 pub AND_BIT_OP: MyToken = <s:"&">  =>  MyToken::BinOperator{ val: s.to_string() };
 pub OR_BIT_OP:  MyToken = <s:"|"> =>   MyToken::BinOperator{ val: s.to_string() };
 pub XOR_BIT_OP: MyToken = <s:"^"> =>   MyToken::BinOperator{ val: s.to_string() };
@@ -259,18 +243,6 @@ pub IDENT: MyToken = {
      }
 };
 
-pub PROCEDURE_PARAMS: Vec<MyToken> = {
-     <id:IDENT> <del:COMMA_DEL> <a:PROCEDURE_PARAMS> => {
-          let mut output = vec![id, del];
-          output.extend(a);
-          output
-     },
-
-     <id:IDENT> => {
-          vec![id]
-     }
-}
-
 pub DECLARATION: Vec<MyToken> = { 
      r"DCL\s+" <id:IDENT> <t:TYPE_T> <end_del:INSTRUC_DEL> =>  { 
           let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }, id];
@@ -292,85 +264,30 @@ pub DECLARATION: Vec<MyToken> = {
           output
      },
 
-     r"DCL\s+" <a:ARRAY_T> <end_del:INSTRUC_DEL> => {
+     r"DCL\s+" <a:ARRAY_T> => {
           let mut output = vec![MyToken::Keywoard{ val: "DCL".to_string() }];
           output.extend(a);
-          output.push(end_del);
-          output
-     },
-
-     <id:IDENT> ":" 
-     "PROCEDURE" <del1:OPEN_PR_DEL> <params:PROCEDURE_PARAMS> <del2:CLOS_PR_DEL> 
-     "RETURNS" <del3:OPEN_PR_DEL> <t:TYPE_T> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}, del1];
-          output.extend(params);
-          output.extend(vec![del2, MyToken::Keywoard{ val: "RETURNS".to_string()}, del3]);
-          output.extend(t);
-          output.extend(vec![del4, end_del]);
-          output
-     },
-
-     <id:IDENT> ":" 
-     "PROCEDURE" <del1:OPEN_PR_DEL> <params:PROCEDURE_PARAMS> <del2:CLOS_PR_DEL> 
-     "RETURNS" <del3:OPEN_PR_DEL> <id2:IDENT> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}, del1];
-          output.extend(params);
-          output.extend(vec![del2, MyToken::Keywoard{ val: "RETURNS".to_string()}, del3, id2, del4, end_del]);
-          output
-     },
-
-     <id:IDENT> ":" 
-     "PROCEDURE" <del1:OPEN_PR_DEL> <params:PROCEDURE_PARAMS> <del2:CLOS_PR_DEL> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}, del1];
-          output.extend(params);
-          output.extend(vec![del2, end_del]);
-          output
-     },
-
-     <id:IDENT> ":"  "PROCEDURE" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}];
-          output.extend(vec![MyToken::Delimiter{ val: ":".to_string()}, end_del]);
-          output
-     },
-
-     <id:IDENT> ":"  r"PROCEDURE\s+RETURNS" <del3:OPEN_PR_DEL> <id2:IDENT> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}];
-          output.extend(vec![MyToken::Keywoard{ val: "RETURNS".to_string()}, del3, id2, del4, end_del]);
-          output
-     },
-
-     <id:IDENT> ":"  r"PROCEDURE\s+RETURNS" <del3:OPEN_PR_DEL> <t:TYPE_T> <del4:CLOS_PR_DEL> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, MyToken::Keywoard{ val: "PROCEDURE".to_string()}];
-          output.extend(vec![MyToken::Keywoard{ val: "RETURNS".to_string()}, del3]);
-          output.extend(t);
-          output.extend(vec![del4, end_del]);
           output
      }
 };
 
-pub FUNCTION_CALL: Vec<MyToken> = {
-     
-};
-
 pub EXPR: Vec<MyToken> = {
      #[precedence(level="0")]
-     <expr:IDENT> => {
-          vec![expr]
-     },
-
-     #[precedence(level="0")]
-     <expr:LIT_LIT> => {
-          vec![expr]
+     <del1:OPEN_PR_DEL> <exp:EXPR> <del2:CLOS_PR_DEL> => {
+          let mut output = vec![del1]; output.extend(exp); output.push(del2); output
      },
 
      #[precedence(level="1")] #[assoc(side="left")]
-     <exp1:EXPR> <op:FIELD_DEL> <exp2:EXPR> => {
+     <del1:OPEN_BR_DEL> <exp:EXPR> <del2:CLOS_BR_DEL> => {
+          let mut output = vec![del1]; output.extend(exp); output.push(del2); output
+     },
+
+     <del1:OPEN_BR_DEL> <exp:EXPR> <del2:CLOS_BR_DEL> => {
+          let mut output = vec![del1]; output.extend(exp); output.push(del2); output
+     },
+
+     <exp1:EXPR> <op:COMMA_DEL> <exp2:EXPR> => {
           let mut output = exp1; output.push(op); output.extend(exp2); output
-     },
-
-     #[precedence(level="1")] #[assoc(side="left")]
-     <id:IDENT> <del1:OPEN_BR_DEL> <exp:EXPR> <del2:CLOS_BR_DEL> => {
-          let mut output = vec![id, del1]; output.extend(exp); output.push(del2); output
      },
 
      #[precedence(level="2")] #[assoc(side="left")]
@@ -380,11 +297,6 @@ pub EXPR: Vec<MyToken> = {
 
      #[precedence(level="2")] #[assoc(side="left")]
      <exp1:EXPR> <op:DIV_OP> <exp2:EXPR> => {
-          let mut output = exp1; output.push(op); output.extend(exp2); output
-     },
-
-     #[precedence(level="2")] #[assoc(side="left")]
-     <exp1:EXPR> <op:MOD_OP> <exp2:EXPR> => {
           let mut output = exp1; output.push(op); output.extend(exp2); output
      },
 
@@ -413,140 +325,41 @@ pub EXPR: Vec<MyToken> = {
           let mut output = exp1; output.push(op); output.extend(exp2); output
      },
 
-     #[precedence(level="7")] #[assoc(side="left")]
-     <exp1:EXPR> <op:COMMA_DEL> <exp2:EXPR> => {
-          let mut output = exp1; output.push(op); output.extend(exp2); output
-     },
-
-     #[precedence(level="8")] #[assoc(side="left")]
-     <id:IDENT> <del1:OPEN_PR_DEL> <exp2:EXPR> <del2:CLOS_PR_DEL> => {
-          let mut output = vec![id]; output.push(del1); output.extend(exp2); output.push(del2); output
-     },
-
-     #[precedence(level="9")] #[assoc(side="right")]
+     #[precedence(level="7")] #[assoc(side="right")]
      <exp1:EXPR> <op:ASSIGN_DEL> <exp2:EXPR> => {
           let mut output = exp1; output.push(op); output.extend(exp2); output
      },
 
-     #[precedence(level="9")] #[assoc(side="left")]
-     <del1:OPEN_PR_DEL> <exp:EXPR> <del2:CLOS_PR_DEL> => {
-          let mut output = vec![del1]; output.extend(exp); output.push(del2); output
+     #[precedence(level="8")] #[assoc(side="left")]
+     <exp1:EXPR> <op:COMMA_DEL> <exp2:EXPR> => {
+          let mut output = exp1; output.push(op); output.extend(exp2); output
      },
 
-     #[precedence(level="9")] #[assoc(side="left")]
-     r"CALL\s+" <id:IDENT> <del1:OPEN_PR_DEL> <arr:EXPR> <del2:CLOS_PR_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "CALL".to_string() } , id]; output.push(del1); output.extend(arr); output.push(del2); output
-     },
-
-     #[precedence(level="9")] #[assoc(side="left")]
-     r"CALL\s+" <id:IDENT> <del1:OPEN_PR_DEL> <del2:CLOS_PR_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "CALL".to_string() } , id]; output.push(del1);  output.push(del2); output
-     },
-
-     #[precedence(level="11")] #[assoc(side="left")]
      <exp1:EXPR> <op:INSTRUC_DEL> => {
           let mut output = exp1; output.push(op); output
      },
+
+     <expr:IDENT> => {
+          vec![expr]
+     },
+     <expr:LIT_LIT> => {
+          vec![expr]
+     }
 };
 
 pub CYCLE: Vec<MyToken> = {
-     r"DO\s+" <exp1:IDENT> <del:ASSIGN_DEL> <exp2:EXPR> "TO" <exp3:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, exp1, del];
-          output.extend(exp2);
-          output.push(MyToken::Keywoard{ val: "TO".to_string()}); 
-          output.extend(exp3);
-          output.push(end_del); 
+     r"DO\s+" <id:IDENT> <del:ASSIGN_DEL> <lit1:LIT_LIT> r"\s+TO\s+" <lit2:LIT_LIT> <end_del:INSTRUC_DEL> => {
+          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, id, del, lit1, MyToken::Keywoard{ val: "TO".to_string()}, lit2, end_del];
           output
      },
 
-     r"DO\s+" <exp1:IDENT> <del:ASSIGN_DEL> <exp2:EXPR> "TO" <exp3:EXPR> "BY" <exp4:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, exp1, del];
-          output.extend(exp2);
-          output.push(MyToken::Keywoard{ val: "TO".to_string()}); 
-          output.extend(exp3);
-          output.push(MyToken::Keywoard{ val: "BY".to_string()}); 
-          output.extend(exp4);
-          output.push(end_del); 
-          output
-     },
-
-     r"DO\s+WHILE\s*" <exp:EXPR>  <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO WHILE".to_string() }];
-          output.extend(exp);
-          output.push(end_del);
-          output
-     },
-
-     r"DO\s+UNTIL\s+" <exp:EXPR>  <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO UNTIL".to_string() }];
-          output.extend(exp);
-          output.push(end_del);
-          output
-     },
-
-     r"DO\s+FOREVER\s*" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "DO FOREVER".to_string() }];
-          output
-     },
-};
-
-pub CONDITION: Vec<MyToken> = {
-     r"IF\s+" <exp1:EXPR> r"THEN\s+" <exp2:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "IF".to_string() }];
-          output.extend(exp1);
-          output.push(MyToken::Keywoard{ val: "THEN".to_string()});
-          output.extend(exp2);
-          output.push(end_del);
-          output
-     },
-
-     r"ELSE\s+" <exp:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "ELSE".to_string() }];
-          output.extend(exp);
-          output.push(end_del);
-          output
-     },
-
-     r"WHEN\s+" <exp:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "WHEN".to_string() }];
-          output.extend(exp);
-          output.push(end_del);
-          output
-     },
-
-     r"OTHERWISE\s+" <exp:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "WHEN".to_string() }];
-          output.extend(exp);
-          output.push(end_del);
-          output
-     },
-};
-
-pub END_INSTR: Vec<MyToken> = {
-     "END" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "END".to_string() }, end_del];
-          output
-     },
-     "END" <id:IDENT> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "END".to_string() }, id, end_del];
+     r"DO\s+" <id:IDENT> <del:ASSIGN_DEL> <lit1:LIT_LIT> r"\s+TO\s+" <lit2:LIT_LIT> "BY" <lit3:LIT_LIT> <end_del:INSTRUC_DEL> => {
+          let mut output = vec![MyToken::Keywoard{ val: "DO".to_string() }, id, del, lit1, MyToken::Keywoard{ val: "TO".to_string()}, lit2, MyToken::Keywoard{ val: "BY".to_string()}, lit3, end_del];
           output
      }
-}
+};
 
 pub INSTRUCTION: Vec<MyToken> = {
      <decl:DECLARATION> => decl,
-     <cycl:CYCLE>       => cycl,
-     <expr:EXPR>        => expr,
-     <cond:CONDITION>   => cond,
-     <end_inst:END_INSTR> => end_inst,
-     "RETURN" <exp:EXPR> => {
-          let mut output = vec![MyToken::Keywoard{ val: "RETURN".to_string() }]; output.extend(exp); output
-     },
-     "RETURN" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ val: "RETURN".to_string() }, end_del]; output
-     },
-
-     <end_del:INSTRUC_DEL> => {
-          let mut output = vec![end_del]; output
-     },
+     <cycl:CYCLE> => cycl
 };

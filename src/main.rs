@@ -19,18 +19,20 @@ fn lex_analyze(exprs: &Vec<String>) {
         println!("{}", expr);
 
         match inst_p.parse(expr) {
-            Ok(some) => { 
-                println!("decl: {:?}", some);
-                continue;
-            },
             Err(some) => println!("err: {:?}", some),
+            // Ok(some) => { 
+            //     println!("decl: {:?}", some);
+            //     continue;
+            // },
+            _ => {}
+            // Err(some) => println!("err: {:?}", some),
         };
     }
 }
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program1.txt";
+    let file_path = "./resources/program3.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 
