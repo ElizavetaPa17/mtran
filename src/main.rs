@@ -40,8 +40,6 @@ fn handle_tokens(tokens: &Vec<MyToken>, full_text: String) {
                     Some(found_index) => {
                         let position = format!("{}:{}", line_row+1, line_index +  found_index + 1);
                         println!("{:^23}|{:^34}|{:^23}", token_value.green(), lexeme_value.white(), position);
-                        //println!("{}: {}; row: {}, col: {}", "FOUND: ".green(), token_value, line_row+1, line_index +  found_index + 1);
-                        //println!("{}: {}; row: {}, col: {}, found_index: {}", "FOUND: ".green(), lexeme_value, line_row+1, line_index +  found_index + 1, found_index);
                         index += 1;
                         line_index += lexeme_value.len() + found_index;
                     }, 
@@ -77,7 +75,7 @@ fn lex_analyze(exprs: &Vec<String>, full_text: String) {
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program3.txt";
+    let file_path = "./resources/program2.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 

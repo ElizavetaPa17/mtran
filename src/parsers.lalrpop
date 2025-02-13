@@ -510,7 +510,7 @@ pub CONDITION: Vec<MyToken> = {
      },
 
      r"OTHERWISE\s+" <exp:EXPR> <end_del:INSTRUC_DEL> => {
-          let mut output = vec![MyToken::Keywoard{ token: "WHEN".to_string(), lexeme: "WHEN".to_string() }];
+          let mut output = vec![MyToken::Keywoard{ token: "OTHERWISE".to_string(), lexeme: "OTHERWISE".to_string() }];
           output.extend(exp);
           output.push(end_del);
           output
