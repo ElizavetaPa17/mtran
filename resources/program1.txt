@@ -46,7 +46,7 @@ ELSE
    CallSuccess = 'No even numbers found.';
 
 (x + y);
-	
+
 CalculateSum:
    PROCEDURE (x, y) RETURNS(FLOAT DECIMAL(10,2));
    DCL x FLOAT DECIMAL(10, 2);

@@ -5,6 +5,5 @@ pub enum MyToken {
     Type { val: String },
     Identification { val: String},
     BinOperator { val: String },
-    CmpOperator { val: String },
     Keywoard { val: String },
 }

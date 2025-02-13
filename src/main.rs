@@ -1,143 +1,89 @@
 mod token;
 
+#[macro_use(lazy_static)]
+extern crate lazy_static;
+
 #[macro_use]
 extern crate lalrpop_util;
 use std::fs::File;
 use std::io::{Read};
+use colored::Colorize;
+use token::MyToken;
+use std::sync::Mutex;
+
+lazy_static! {
+    static ref COUNTER_ROWS: Mutex<usize> = Mutex::new(0);
+}
 
 fn split_by_exprs(input: String) -> Vec<String> {
     input.split(';').map(|s| format!("{};", s)).collect()
 }
 
+fn handle_tokens(tokens: &Vec<MyToken>, full_text: String) {
+    let lines: Vec<&str> = full_text.lines().collect();
+    let mut _token_index: usize = 0;
+    
+    let mut index: usize = 0;
+    for (line_row, line) in lines.iter().enumerate() {
+        let words: Vec<&str> = line.split_whitespace().collect();
+        if !words.is_empty() {
+            let mut line_index: usize = 0;
+            let mut token_value:String;
+            loop { 
+                match &tokens[index] {
+                    MyToken::Type{val: s}                     => token_value = s.clone(),
+                    MyToken::Delimiter{val: s}                => token_value = s.clone(),
+                    MyToken::Literal{t: typ, val: s} => token_value = s.clone(),
+                    MyToken::Identification{val: s}           => token_value = s.clone(),
+                    MyToken::BinOperator{val: s}              => token_value = s.clone(),
+                    MyToken::Keywoard{val: s}                 => token_value = s.clone(),
+                };
+
+                match line[line_index..].find(&token_value) {
+                    Some(found_index) => {
+                        println!("{}: {}; row: {}, col: {}", "FOUND: ".green(), token_value, line_row+1, line_index +  found_index + 1);
+                        index += 1;
+                        line_index += token_value.len() + found_index;
+                    }, 
+                    None => {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[allow(unused_variables)]
-fn lex_analyze(exprs: &Vec<String>) {
+fn lex_analyze(exprs: &Vec<String>, full_text: String) {
     #[allow(unused_variables)]
     // Init parsers
     let inst_p   = parsers::INSTRUCTIONParser::new();
+    let row: i64 = 0;
+    let col: i64 = 0;
+    let mut all_tokens: Vec<MyToken> = vec![];
 
     for expr in exprs {
         match inst_p.parse(expr) {
-            Ok(some) => { 
-                 continue;
+            Ok(tokens) => { 
+                all_tokens.extend(tokens);
+                continue;
             },
-            Err(some) => println!("ERROR: {:?}", some),
+            Err(error) => println!("{}: {:?}", "ERROR: ".red(), error),
         };
     }
+    handle_tokens(&all_tokens, full_text.clone());
 }
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program2.txt";
+    let file_path = "./resources/program1.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 
     let _ = file.read_to_string(&mut contents);
-    let exprs: Vec<String> = split_by_exprs(contents);
-    lex_analyze(&exprs);
+    let exprs: Vec<String> = split_by_exprs(contents.clone());
+    lex_analyze(&exprs, contents.clone());
 }
 
 lalrpop_mod!(pub parsers); 
-
-#[test]
-fn parsers1() {
-    //assert!(parsers::DECLARATIONParser::new().parse("DCL a CHAR(30);").is_ok());
-    //assert!(parsers::DECLARATIONParser::new().parse("DCL i FIXED BINARY(30);").is_ok());
-
-    /*assert!(parsers::IDENTParser::new().parse("DCL ajknwd2o1p2ke").is_ok());
-    assert!(parsers::IDENTParser::new().parse("DCL awJNAkwd_Wijdiq132_").is_ok());
-    assert!(parsers::IDENTParser::new().parse("DCL 12awJNAkwd_Wijdiq132_").is_err());
-    assert!(parsers::IDENTParser::new().parse("DCL _").is_err());
-
-    let result = match parsers::CHAR_TParser::new().parse("CHAR(30)") {
-        Ok(some) => println!("ok: {}", some),
-        Err(some) => println!("err: {}", some)
-    };
-
-    assert!(parsers::CHAR_TParser::new().parse("CHAR(30)").is_ok());
-    assert!(parsers::CHAR_TParser::new().parse("CHAR(-30)").is_err());
-    assert!(parsers::CHAR_TParser::new().parse("CHAR(fqkmw)").is_err());
-
-    assert!(parsers::CHAR_VAR_TParser::new().parse("VARYING CHARACTER(30)").is_ok());
-    assert!(parsers::CHAR_VAR_TParser::new().parse("VARYING CHARACTER(-30)").is_err());
-    assert!(parsers::CHAR_VAR_TParser::new().parse("VARYING CHARACTER(fqkmw)").is_err());
-
-    assert!(parsers::LOG_TParser::new().parse("LOGICAL").is_ok());
-    assert!(parsers::LOG_TParser::new().parse("LOGICALLO").is_err());
-
-    assert!(parsers::PTR_TParser::new().parse("POINTER").is_ok());
-
-    assert!(parsers::BIT_TParser::new().parse("BIT(30)").is_ok());
-    assert!(parsers::BIT_TParser::new().parse("BIT(-30)").is_err());
-    assert!(parsers::BIT_TParser::new().parse("BIT(fwkj)").is_err());
-
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BINARY(30)").is_ok());
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BIN(30)").is_ok());
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BINARY(-30)").is_err());
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BIN(-30)").is_err());
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BINARY(3wd)").is_err());
-    assert!(parsers::FIX_BIN_TParser::new().parse("FIXED BIN(awwad)").is_err());
-    
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL(10)").is_ok());
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL(10, 10)").is_ok());
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL(10,)").is_err());
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL(10, awd)").is_err());
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL(awd, 10)").is_err());
-    assert!(parsers::FLT_DEC_TParser::new().parse("FLOAT DECIMAL").is_err());
-
-    assert!(parsers::INT_TParser::new().parse("INTEGER").is_ok());
-    assert!(parsers::INT_TParser::new().parse("INTEGERER").is_err());
-
-    assert!(parsers::ARRAY_TParser::new().parse("DCL akwd(10) LIKE(Person)").is_ok());
-    assert!(parsers::ARRAY_TParser::new().parse("DCL akwd(10, 10) LIKE(Person)").is_ok());
-    assert!(parsers::ARRAY_TParser::new().parse("DCL A(10, 10) FIXED BINARY(10)").is_ok());
-    assert!(parsers::ARRAY_TParser::new().parse("DCL akwd(10) LIKES(Person)").is_err());
-    assert!(parsers::ARRAY_TParser::new().parse("DCL A(10, 10)").is_err());
-
-    assert!(parsers::STRUCT_TParser::new().parse("DCL 1 Employee,
-   	    2 ID FIXED BIN(31);").is_ok());
-    assert!(parsers::STRUCT_TParser::new().parse("DCL 1 Person,
-     	2 Name CHAR(50),
-     	2 Age FIXED DECIMAL(3, 0);").is_ok());
-
-    assert!(parsers::STRUCT_TParser::new().parse("DCL 1 Employee,
-   	2 ID FIXED BIN(31),
-   	2 Salary FIXED DECIMAL(10, 2),
-   	2 Name CHAR(20);").is_ok());
-
-
-    assert!(parsers::FLT_LITParser::new().parse("-123123.1212").is_ok());
-    assert!(parsers::FLT_LITParser::new().parse("1.1212").is_ok());
-    assert!(parsers::FLT_LITParser::new().parse(".1212").is_err());
-    assert!(parsers::FLT_LITParser::new().parse("1.").is_err());
-    assert!(parsers::FLT_LITParser::new().parse("-1.12dm").is_err());
-
-    assert!(parsers::FLT_EXP_LITParser::new().parse("-123123.1212E-2").is_ok());
-    assert!(parsers::FLT_EXP_LITParser::new().parse("1.1212E-2").is_ok());
-    assert!(parsers::FLT_EXP_LITParser::new().parse("1.1212E-qkkqmwd").is_err());
-    assert!(parsers::FLT_EXP_LITParser::new().parse("1.1E").is_err());
-    assert!(parsers::FLT_EXP_LITParser::new().parse("-1s.12E1").is_err());
-
-    assert!(parsers::DEC_INT_LITParser::new().parse("-3819").is_ok());
-    assert!(parsers::UDEC_INT_LITParser::new().parse("9").is_ok());
-    assert!(parsers::DEC_INT_LITParser::new().parse("9a").is_err());
-
-    assert!(parsers::BIN_INT_LITParser::new().parse("010010010101B").is_ok());
-    assert!(parsers::BIN_INT_LITParser::new().parse("010010010101").is_err());
-    assert!(parsers::BIN_INT_LITParser::new().parse("01021B").is_err());
-
-    assert!(parsers::CHR_LITParser::new().parse("'awkdmAKkwdmkawd2d21 1 2d   awkdm awd awkda  _dawd'").is_ok());
-    assert!(parsers::CHR_LITParser::new().parse("awkdmAKkwdmkawd2d21 1 2d   awkdm awd awkda  _dawd'").is_err());
-
-    assert!(parsers::PLUS_OPParser::new().parse("+").is_ok());
-    assert!(parsers::MIN_OPParser::new().parse("-").is_ok());
-    assert!(parsers::MUL_OPParser::new().parse("*").is_ok());
-    assert!(parsers::DIV_OPParser::new().parse("/").is_ok());
-    assert!(parsers::AND_BIT_OPParser::new().parse("AND").is_ok());
-    assert!(parsers::AND_BIT_OPParser::new().parse("&").is_ok());
-    assert!(parsers::OR_BIT_OPParser::new().parse("OR").is_ok());
-    assert!(parsers::OR_BIT_OPParser::new().parse("|").is_ok());
-    assert!(parsers::XOR_BIT_OPParser::new().parse("XOR").is_ok());
-    assert!(parsers::XOR_BIT_OPParser::new().parse("^").is_ok());
-    assert!(parsers::AND_CND_OPParser::new().parse("&&").is_ok());
-    assert!(parsers::OR_CND_OPParser::new().parse("||").is_ok());*/
-}

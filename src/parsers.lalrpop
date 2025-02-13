@@ -71,7 +71,7 @@ pub FLT_DEC_T: Vec<MyToken> = {
           vec![MyToken::Type{ val: "FLOAT DECIMAL".to_string() }, op, d, cp]
      },
      r"FLOAT DECIMAL" <op:OPEN_PR_DEL> <d1:UDEC_INT_LIT> <del:COMMA_DEL> <d2:UDEC_INT_LIT> <cp:CLOS_PR_DEL> => { 
-          vec![MyToken::Type{ val: "FIXED DECIMAL".to_string() }, op, d1, del, d2, cp]
+          vec![MyToken::Type{ val: "FLOAT DECIMAL".to_string() }, op, d1, del, d2, cp]
      },
 };
 
@@ -215,12 +215,12 @@ pub AND_CND_OP: MyToken = <s:"&&"> =>  MyToken::BinOperator{ val: s.to_string() 
 pub OR_CND_OP:  MyToken = <s:"||"> =>  MyToken::BinOperator{ val: s.to_string() };
 pub NEG_OP:     MyToken = <s:"!"> =>   MyToken::BinOperator{ val: s.to_string() };
 
-pub EQ_CMP: MyToken = <s:"=="> => MyToken::CmpOperator{ val: s.to_string() };
-pub NQ_CMP: MyToken = <s:"!="> => MyToken::CmpOperator{ val: s.to_string() };
-pub LS_CMP: MyToken = <s:"<"> =>  MyToken::CmpOperator{ val: s.to_string() };
-pub GR_CMP: MyToken = <s:">"> =>  MyToken::CmpOperator{ val: s.to_string() };
-pub LE_CMP: MyToken = <s:"<="> => MyToken::CmpOperator{ val: s.to_string() };
-pub GE_CMP: MyToken = <s:">="> => MyToken::CmpOperator{ val: s.to_string() };
+pub EQ_CMP: MyToken = <s:"=="> => MyToken::BinOperator{ val: s.to_string() };
+pub NQ_CMP: MyToken = <s:"!="> => MyToken::BinOperator{ val: s.to_string() };
+pub LS_CMP: MyToken = <s:"<"> =>  MyToken::BinOperator{ val: s.to_string() };
+pub GR_CMP: MyToken = <s:">"> =>  MyToken::BinOperator{ val: s.to_string() };
+pub LE_CMP: MyToken = <s:"<="> => MyToken::BinOperator{ val: s.to_string() };
+pub GE_CMP: MyToken = <s:">="> => MyToken::BinOperator{ val: s.to_string() };
 
 pub CMP_OP: MyToken = {
      <tok:EQ_CMP> => tok,
