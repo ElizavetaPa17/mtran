@@ -1,7 +1,7 @@
 DCL 1 Product,
-     	2 ID FIXED BINARY(9),
-     	2 Name CHAR(30),
-     	2 Price FLOAT DECIMAL(7,2);
+        2 ID FIXED BINARY(9),
+        2 Name CHAR(30),
+        2 Price FLOAT DECIMAL(7,2);
 
 DCL ProductsArray(5) LIKE(Product);
 DCL j FIXED BINARY(15);
@@ -10,43 +10,43 @@ DCL P POINTER;
 P = CALL ADDR(totalPrice);
 
 DO j = 1 TO 5 BY 1;
-	ProductsArray[j].ID = j;
-	ProductsArray[j].Name = 'Product ' || j;
-	ProductsArray[j].Price = j * 10.50;
-	totalPrice = totalPrice + ProductsArray[j].Price;
+    ProductsArray[j].ID = j;
+    ProductsArray[j].Name = 'Product ' || j;
+    ProductsArray[j].Price = j * 10.50;
+    totalPrice = totalPrice + ProductsArray[j].Price;
 END;
 
 SELECT;
-	WHEN totalPrice < 50;
-    	totalPrice = 51;
-	WHEN totalPrice >= 50 && totalPrice < 100;
-    	totalPrice = 101;
-	OTHERWISE
-    	totalPrice = 0;
+    WHEN totalPrice < 50;
+        totalPrice = 51;
+    WHEN totalPrice >= 50 && totalPrice < 100;
+        totalPrice = 101;
+    OTHERWISE
+        totalPrice = 0;
 
 DCL 1 StringList VARYING CHARACTER(100),
-	2 Strings(5) LIKE(VARYING CHARACTER(100));
+        2 Strings(5) LIKE(VARYING CHARACTER(100));
 
 DCL Index FIXED BINARY(31) INIT(1);
 DCL UserInput CHAR(100);
 DCL Continue LOGICAL INIT('Y');
 
 DO FOREVER;
-   IF Continue THEN UserInput = 'Введите строку для добавления (или EXIT для выхода)';
-  	IF CALL TRIM(UserInput) THEN
-     		LEAVE;
-  	END;
+    IF Continue THEN UserInput = 'Введите строку для добавления (или EXIT для выхода)';
+    IF CALL TRIM(UserInput) THEN
+        LEAVE;
+    END;
 
-  	Strings[Index] = CALL TRIM(UserInput);
-  	Index = Index + 1;
+    Strings[Index] = CALL TRIM(UserInput);
+    Index = Index + 1;
 
-  	IF Index > 5 THEN
-     		Continue = 'N'; 
-  	END;
+    IF Index > 5 THEN
+        Continue = 'N'; 
+    END;
 END;
 
-DCL  BitString1 BIT(8) INIT(00000001B); 
-DCL  BitString2 BIT(8) INIT(00000010B); 
-DCL  Result BIT(8);
+DCL BitString1 BIT(8) INIT(00000001B); 
+DCL BitString2 BIT(8) INIT(00000010B); 
+DCL Result BIT(8);
 
 Result = BitString1 & BitString2; 

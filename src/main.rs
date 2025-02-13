@@ -1,25 +1,21 @@
 mod token;
 
-#[macro_use(lazy_static)]
-extern crate lazy_static;
-
 #[macro_use]
 extern crate lalrpop_util;
 use std::fs::File;
 use std::io::{Read};
 use colored::Colorize;
 use token::MyToken;
-use std::sync::Mutex;
-
-lazy_static! {
-    static ref COUNTER_ROWS: Mutex<usize> = Mutex::new(0);
-}
 
 fn split_by_exprs(input: String) -> Vec<String> {
     input.split(';').map(|s| format!("{};", s)).collect()
 }
 
-fn handle_tokens(tokens: &Vec<MyToken>, full_text: String) {
+fn handle_tokens(tokens: &Vec<MyToken>, full_text: String) { 
+    println!("{:-<35} {} {:-<35} ", "", "Token List".yellow().bold(), "");
+    println!("{:^23}|{:^34}|{:^23}", "Token".blue(), "Lexeme".blue(), "Position".blue());
+    println!("{:-<82} ", "");
+
     let lines: Vec<&str> = full_text.lines().collect();
     let mut _token_index: usize = 0;
     
@@ -29,21 +25,25 @@ fn handle_tokens(tokens: &Vec<MyToken>, full_text: String) {
         if !words.is_empty() {
             let mut line_index: usize = 0;
             let mut token_value:String;
+            let mut lexeme_value:String;
             loop { 
                 match &tokens[index] {
-                    MyToken::Type{val: s}                     => token_value = s.clone(),
-                    MyToken::Delimiter{val: s}                => token_value = s.clone(),
-                    MyToken::Literal{t: typ, val: s} => token_value = s.clone(),
-                    MyToken::Identification{val: s}           => token_value = s.clone(),
-                    MyToken::BinOperator{val: s}              => token_value = s.clone(),
-                    MyToken::Keywoard{val: s}                 => token_value = s.clone(),
+                    MyToken::Type{token: a, lexeme: b} |
+                    MyToken::Delimiter{token: a, lexeme: b} | 
+                    MyToken::Literal{token: a, lexeme: b} |
+                    MyToken::Identification{token: a, lexeme: b} |
+                    MyToken::BinOperator{token: a, lexeme: b} |
+                    MyToken::Keywoard{token: a, lexeme: b} => { token_value = a.clone(); lexeme_value = b.clone() },
                 };
 
-                match line[line_index..].find(&token_value) {
+                match line[line_index..].find(&lexeme_value) {
                     Some(found_index) => {
-                        println!("{}: {}; row: {}, col: {}", "FOUND: ".green(), token_value, line_row+1, line_index +  found_index + 1);
+                        let position = format!("{}:{}", line_row+1, line_index +  found_index + 1);
+                        println!("{:^23}|{:^34}|{:^23}", token_value.green(), lexeme_value.white(), position);
+                        //println!("{}: {}; row: {}, col: {}", "FOUND: ".green(), token_value, line_row+1, line_index +  found_index + 1);
+                        //println!("{}: {}; row: {}, col: {}, found_index: {}", "FOUND: ".green(), lexeme_value, line_row+1, line_index +  found_index + 1, found_index);
                         index += 1;
-                        line_index += token_value.len() + found_index;
+                        line_index += lexeme_value.len() + found_index;
                     }, 
                     None => {
                         break;
@@ -69,7 +69,7 @@ fn lex_analyze(exprs: &Vec<String>, full_text: String) {
                 all_tokens.extend(tokens);
                 continue;
             },
-            Err(error) => println!("{}: {:?}", "ERROR: ".red(), error),
+            Err(error) => { println!("{}: {:?}", "ERROR: ".red(), error); return; }
         };
     }
     handle_tokens(&all_tokens, full_text.clone());
@@ -77,7 +77,7 @@ fn lex_analyze(exprs: &Vec<String>, full_text: String) {
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program1.txt";
+    let file_path = "./resources/program3.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 

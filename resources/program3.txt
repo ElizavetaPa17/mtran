@@ -1,8 +1,8 @@
 
 DCL 1 Employee,
-   	2 ID FIXED BIN(31),
-   	2 Salary FIXED DECIMAL(10,2),
-   	2 Name CHAR(20);
+      2 ID FIXED BIN(31),
+      2 Salary FIXED DECIMAL(10,2),
+      2 Name CHAR(20);
 
 DCL Count FIXED BIN(31) INIT(0);
 DCL TotalSalary FLOAT DECIMAL(10,2) INIT(0);
@@ -26,10 +26,10 @@ AverageSalary = TotalSalary;
 CALL UtilitySub();
 
 UtilitySub:
-	    PROCEDURE;
-    DCL a FLOAT BINARY(30);
-    a = 100;
-END UtilitySub; 
+   PROCEDURE;
+   DCL a FLOAT BINARY(30);
+   a = 100;
+END UtilitySub;
 	
 Snt:
 PROCEDURE;
@@ -54,7 +54,7 @@ PROCEDURE;
                token = CALL SUBSTR(line, 1, i+1);
             RETURN;
          END;
-	END;
+   END;
 END Snt;
 
 DCL num1 INTEGER INIT(10);
