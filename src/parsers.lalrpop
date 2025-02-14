@@ -328,7 +328,7 @@ pub DECLARATION: Vec<MyToken> = {
      },
 
      <id:IDENT> <del0:PROC_DEL> "PROCEDURE" <end_del:INSTRUC_DEL> => {
-          let mut output = vec![id, del0, MyToken::Keywoard{ token: "PROCEDURE".to_string(), lexeme: "PROCEDURE".to_string() }, end_del];
+          let output = vec![id, del0, MyToken::Keywoard{ token: "PROCEDURE".to_string(), lexeme: "PROCEDURE".to_string() }, end_del];
           output
      },
 
@@ -537,8 +537,13 @@ pub INSTRUCTION: Vec<MyToken> = {
      "RETURN" <exp:EXPR> => {
           let mut output = vec![MyToken::Keywoard{ token: "RETURN".to_string(), lexeme: "RETURN".to_string() }]; output.extend(exp); output
      },
+
      "RETURN" <end_del:INSTRUC_DEL> => {
           let output = vec![MyToken::Keywoard{ token: "RETURN".to_string(), lexeme: "RETURN".to_string() }, end_del]; output
+     },
+
+     "SELECT" <end_del:INSTRUC_DEL> => {
+          let output = vec![MyToken::Keywoard{ token: "SELECT".to_string(), lexeme: "SELECT".to_string() }, end_del]; output
      },
 
      <end_del:INSTRUC_DEL> => {

@@ -29,19 +29,19 @@ DCL 1 StringList VARYING CHARACTER(100),
 
 DCL Index FIXED BINARY(31) INIT(1);
 DCL UserInput CHAR(100);
-DCL Continue LOGICAL INIT('Y');
+DCL IsContinue LOGICAL INIT('Y');
 
 DO FOREVER;
-    IF Continue THEN UserInput = 'Введите строку для добавления (или EXIT для выхода)';
+    IF IsContinue THEN UserInput = 'Введите строку';
     IF CALL TRIM(UserInput) THEN
-        LEAVE;
+        UserInput = 'Hi';
     END;
 
     Strings[Index] = CALL TRIM(UserInput);
     Index = Index + 1;
 
     IF Index > 5 THEN
-        Continue = 'N'; 
+        IsContinue = 'N'; 
     END;
 END;
 

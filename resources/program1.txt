@@ -7,10 +7,10 @@ DCL i FIXED BINARY(15);
 DCL f FIXED BINARY(15,11);
 DCL totalAge FIXED DECIMAL(4,0) INIT(0);
 DCL averageHeight FLOAT DECIMAL(5,2) INIT(0.0);
-
 DCL Sum FLOAT DECIMAL(10,2) INIT(0);
 DCL Value FIXED BINARY(31) INIT(1);
 
+DCL j FIXED DECIMAL('Hello, world');
 i = i + 1;
 
 DO i = 1 TO 10 BY 1;
@@ -41,9 +41,9 @@ DCL CallSuccess CHAR(50);
 totalAge = CALL CalculateSum(10, 2);
 
 IF Sum > 0 THEN
-   CallSuccess = 'Sum calculated successfully.';
+   CallSuccess = 'Sum calculated.';
 ELSE
-   CallSuccess = 'No even numbers found.';
+   CallSuccess = 'No even found.';
 
 (x + y);
 
