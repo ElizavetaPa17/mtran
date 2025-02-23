@@ -1,7 +1,10 @@
 mod token;
+mod ast_utility;
 
 #[macro_use]
 extern crate lalrpop_util;
+lalrpop_mod!(pub parsers); 
+
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read};
@@ -182,13 +185,13 @@ fn lex_analyze(exprs: &Vec<String>, full_text: String) {
     }
 
     if !was_error {
-        handle_tokens(&all_tokens, full_text.clone());
+        //handle_tokens(&all_tokens, full_text.clone());
     }
 }
 
 fn main() {
     #[allow(unused_variables)]
-    let file_path = "./resources/program1.txt";
+    let file_path = "./resources/program_test.txt";
     let mut file = File::open(file_path).expect("Not such file");
     let mut contents = String::new();
 
@@ -196,5 +199,3 @@ fn main() {
     let exprs: Vec<String> = split_by_exprs(contents.clone());
     lex_analyze(&exprs, contents.clone());
 }
-
-lalrpop_mod!(pub parsers); 
