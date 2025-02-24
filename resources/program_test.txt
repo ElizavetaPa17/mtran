@@ -29,8 +29,47 @@ END;
 
 DO FOREVER;
     Index = Index + 1;
-
-    IF Index > 5 THEN
-        IsContinue = 'N'; 
-    END;
 END;
+
+IF Index > 5 THEN
+        IsContinue = 'N'; 
+END;
+
+IF Sum > 0 THEN
+   CallSuccess = 'Even.';
+ELSE
+   CallSuccess = 'NotEven.';
+END;
+
+
+CalculateSum:
+   PROCEDURE (x, y) RETURNS(FLOAT DECIMAL(10,2));
+   DCL x FLOAT DECIMAL(10, 2);
+   DCL y FLOAT DECIMAL(10, 2);
+   DCL result FLOAT DECIMAL(10, 2);
+   result = x + y;
+   RETURN result;
+END CalculateSum;
+
+
+DCL BitString1 BIT(8) INIT(00000001B); 
+DCL BitString2 BIT(8) INIT(00000010B); 
+DCL Result BIT(8);
+
+Result = BitString1 & BitString2; 
+
+CALL UtilitySub();
+
+UtilitySub:
+   PROCEDURE;
+   DCL a FLOAT BINARY(30);
+   a = 100;
+END UtilitySub;
+
+SELECT;
+    WHEN totalPrice < 50;
+        totalPrice = 51;
+    WHEN totalPrice >= 50;
+        totalPrice = 101;
+    OTHERWISE
+        totalPrice = 0;

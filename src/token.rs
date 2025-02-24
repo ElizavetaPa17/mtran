@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MyToken {
     Delimiter      { token: String, lexeme: String },
     Literal        { token: String, lexeme: String },

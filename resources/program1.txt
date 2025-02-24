@@ -43,6 +43,7 @@ IF Sum > 0 THEN
    CallSuccess = 'Sum calculated.';
 ELSE
    CallSuccess = 'No even found.';
+END;
 
 (x + y);
 
