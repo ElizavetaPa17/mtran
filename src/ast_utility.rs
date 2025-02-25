@@ -5,45 +5,32 @@ use crossterm::{
 
 use crossterm::terminal::ClearType;
 
-use std::io::{self, Write};
+use std::io::{self};
 use crate::token::MyToken;
 
 use once_cell::sync::Lazy; 
 use std::sync::Mutex;
 
-static struct_level: Lazy<Mutex<u16>> = Lazy::new(|| {
+static STRUCT_LEVEL: Lazy<Mutex<u16>> = Lazy::new(|| {
     Mutex::new(0)
 });
 
-static struct_begin: Lazy<Mutex<bool>> = Lazy::new(|| {
+static STRUCT_BEGIN: Lazy<Mutex<bool>> = Lazy::new(|| {
     Mutex::new(true)
 });
 
-static operation_level: Lazy<Mutex<usize>> = Lazy::new(|| {
+static OPERATION_LEVEL: Lazy<Mutex<usize>> = Lazy::new(|| {
     Mutex::new(0)
 });
-
-static end_str: Lazy<Mutex<Vec<String>>> = Lazy::new(|| {
+static END_STR: Lazy<Mutex<Vec<String>>> = Lazy::new(|| {
     Mutex::new(Vec::new())
 });
 
-pub fn get_current_console_position() -> (u16, u16) {
-    let mut cols: u16 = 0;
-    let mut rows: u16 = 0;
-    match terminal::size() {
-        Ok(dimens) => {
-            cols = dimens.0; rows = dimens.1;
-        }
-        Err(_) => {}
-    }
-    return (cols, rows);
-}
-
 pub fn print_declaration(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    #[warn(unused_mut)]
+    let opr_lvl = OPERATION_LEVEL.lock().unwrap();
     let spaces = " ".repeat(*opr_lvl);
 
-    let mut stdout = io::stdout();
     match &tokens[1] {
         MyToken::Identification{token: _a, lexeme: b} => { 
             println!("{:}{:12} ═ DCL\n", spaces, b);
@@ -53,9 +40,8 @@ pub fn print_declaration(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_declaration_with_init(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let opr_lvl = OPERATION_LEVEL.lock().unwrap();
     let spaces = " ".repeat(*opr_lvl);
-    let mut stdout = io::stdout();
 
     match &tokens[1] {
         MyToken::Identification{token: _a, lexeme: b} => { 
@@ -74,9 +60,8 @@ pub fn print_declaration_with_init(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_array_declaration(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let opr_lvl = OPERATION_LEVEL.lock().unwrap();
     let spaces = " ".repeat(*opr_lvl);
-    let mut stdout = io::stdout();
 
     match &tokens[0] {
         MyToken::Identification{token: _a, lexeme: b} => { 
@@ -104,7 +89,7 @@ pub fn print_array_declaration(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_struct_part_declaration(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let opr_lvl = OPERATION_LEVEL.lock().unwrap();
     let spaces = " ".repeat(*opr_lvl);
     let mut stdout = io::stdout();
 
@@ -128,9 +113,9 @@ pub fn print_struct_part_declaration(tokens: &Vec<MyToken>) {
         _ => {}
     }
 
-    let mut strct_begin = struct_begin.lock().unwrap();
+    let mut strct_begin = STRUCT_BEGIN.lock().unwrap();
 
-    let mut strct_level = struct_level.lock().unwrap();
+    let mut strct_level = STRUCT_LEVEL.lock().unwrap();
     if *strct_level < level {
        *strct_level = level;
     }
@@ -153,7 +138,7 @@ pub fn print_struct_part_declaration(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_bin_operation(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let opr_lvl = OPERATION_LEVEL.lock().unwrap();
     let spaces = " ".repeat(*opr_lvl);
     let mut stdout = io::stdout();
 
@@ -227,10 +212,8 @@ pub fn print_bin_operation(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_loop(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl += 12;
-
-    let mut stdout = io::stdout();
 
     // retrieve condition
     match &tokens[1] {
@@ -270,12 +253,12 @@ pub fn print_loop(tokens: &Vec<MyToken>) {
         _ => {}
     }
 
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     end.push("CYCLE".to_string());
 }
 
-pub fn print_loop2(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+pub fn print_loop2(_tokens: &Vec<MyToken>) {
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl += 12;
 
     let mut stdout = io::stdout();
@@ -285,16 +268,16 @@ pub fn print_loop2(tokens: &Vec<MyToken>) {
     println!(" {:6} ═ CYCLE CONDITION\n", " ");
     let _ = stdout.execute(cursor::MoveToColumn(0));
 
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     end.push("CYCLE".to_string());
 }
 
-pub fn print_loop3(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+pub fn print_loop3(_tokens: &Vec<MyToken>) {
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl += 12;
 
     println!("FOREVER ═ CYCLE CONDITION\n");
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     end.push("CYCLE".to_string());
 }
 
@@ -311,13 +294,12 @@ pub fn print_condition(tokens: &Vec<MyToken>) {
     println!("{:6} ═ IF CONDITION\n", " ");
 
     {
-        let mut opr_lvl = operation_level.lock().unwrap();
+        let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
         *opr_lvl += 12;
     }
     print_bin_operation(&tokens[5..9].to_vec());
 
     {
-        let mut opr_lvl = operation_level.lock().unwrap();
         let _ = stdout.execute(cursor::MoveUp(1));
         let _ = stdout.execute(cursor::MoveRight(32));
         println!("{:8}╗", " ");
@@ -325,11 +307,11 @@ pub fn print_condition(tokens: &Vec<MyToken>) {
         println!("{:27} ╚ MAIN BRANCH\n", " ");
     }
 
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     end.push("CONDITION".to_string());
 }
 
-pub fn print_else(tokens: &Vec<MyToken>) {
+pub fn print_else(_tokens: &Vec<MyToken>) {
     let mut stdout = io::stdout();
     let _ = stdout.execute(cursor::MoveUp(1));
     let _ = stdout.execute(cursor::MoveRight(32));
@@ -339,16 +321,16 @@ pub fn print_else(tokens: &Vec<MyToken>) {
 }
 
 pub fn print_end() {
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     println!("\nEND {:8} ═ {:} END\n", " ", end.last().unwrap());
     end.pop();
 
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl -= 12;
 }
 
 pub fn print_proc_begin1(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl += 12;
 
     match &tokens[0] {
@@ -359,7 +341,7 @@ pub fn print_proc_begin1(tokens: &Vec<MyToken>) {
         _ => {}
     }
 
-    let mut end = end_str.lock().unwrap();
+    let mut end = END_STR.lock().unwrap();
     end.push("PROC".to_string());
 }
 
@@ -399,13 +381,13 @@ pub fn print_function_call(tokens: &Vec<MyToken>) {
     }
 }
 
-pub fn print_select(tokens: &Vec<MyToken>) {
-    let mut opr_lvl = operation_level.lock().unwrap();
+pub fn print_select(_tokens: &Vec<MyToken>) {
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl += 12;
     println!("SELECT {:20} ═ {:12}", " ", "CONDITION BEGIN");
 }
 
-pub fn print_when_condition(tokens: &Vec<MyToken>) {
+pub fn print_when_condition(_tokens: &Vec<MyToken>) {
     let mut stdout = io::stdout();
 
     let _ = stdout.execute(cursor::MoveUp(1));
@@ -416,7 +398,7 @@ pub fn print_when_condition(tokens: &Vec<MyToken>) {
     let _ = stdout.execute(cursor::MoveToColumn(0));
 }
 
-pub fn print_otherwise_condition(tokens: &Vec<MyToken>) {
+pub fn print_otherwise_condition(_tokens: &Vec<MyToken>) {
     let mut stdout = io::stdout();
 
     let _ = stdout.execute(cursor::MoveUp(1));
@@ -426,6 +408,6 @@ pub fn print_otherwise_condition(tokens: &Vec<MyToken>) {
     println!("{:28}╚ OTHERWISE BRAIN\n", " ");
     let _ = stdout.execute(cursor::MoveToColumn(0));
 
-    let mut opr_lvl = operation_level.lock().unwrap();
+    let mut opr_lvl = OPERATION_LEVEL.lock().unwrap();
     *opr_lvl -= 12;
 }
